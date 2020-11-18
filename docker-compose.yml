@@ -1,0 +1,37 @@
+version: '3'
+services:
+  proxy:
+    build: ./proxy
+    container_name: "app_proxy"
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - "app"
+    volumes:
+      - ./proxy/default.conf:/etc/nginx/conf.d/default.conf
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      go_socket_net:
+        ipv4_address: 172.16.238.10
+    tty: true
+
+  app:
+    build: ./app
+    container_name: app_go
+    ports:
+      - "8080"
+    tty: true
+    volumes:
+      - "./app/main:/go/src/github.com/eifandevs/main"
+    networks:
+      go_socket_net:
+        ipv4_address: 172.16.238.11
+
+networks:
+  go_socket_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/16
